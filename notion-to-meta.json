@@ -1,0 +1,116 @@
+{
+  "id": "1",
+  "name": "Notion ➝ Meta Business Suite",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerType": "databaseItemUpdated",
+        "databaseId": ""
+      },
+      "id": "1",
+      "name": "Notion Trigger",
+      "type": "n8n-nodes-base.notionTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": "",
+        "options": {}
+      },
+      "id": "2",
+      "name": "Get Notion Data",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "return [\n  {\n    json: {\n      text: $json[\"properties\"][\"text\"][\"title\"][0][\"plain_text\"],\n      image: $json[\"properties\"][\"image\"][\"url\"],\n      timestamp: Math.floor(Date.now() / 1000) + 3600 // 1小時後發佈\n    }\n  }\n];"
+      },
+      "id": "3",
+      "name": "Format for Meta",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://graph.facebook.com/v19.0/你的粉絲專頁ID/photos?access_token=你的粉絲專頁AccessToken",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"message\": \"{{$json[\"text\"]}}\",\n  \"url\": \"{{$json[\"image\"]}}\",\n  \"published\": false,\n  \"scheduled_publish_time\": {{$json[\"timestamp\"]}}\n}"
+      },
+      "id": "4",
+      "name": "Schedule Post to Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "pageId": "{{$node[\"Get Notion Data\"].json[\"id\"]}}",
+        "properties": {
+          "Status": "已排程"
+        }
+      },
+      "id": "5",
+      "name": "Update Notion Status",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 1,
+      "position": [1100, 300]
+    }
+  ],
+  "connections": {
+    "Notion Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Notion Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Notion Data": {
+      "main": [
+        [
+          {
+            "node": "Format for Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format for Meta": {
+      "main": [
+        [
+          {
+            "node": "Schedule Post to Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Post to Meta": {
+      "main": [
+        [
+          {
+            "node": "Update Notion Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": []
+}
