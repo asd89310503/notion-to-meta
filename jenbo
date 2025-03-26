@@ -1,0 +1,69 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "triggerType": "databaseItemUpdated",
+        "databaseId": "你的Notion Database ID"
+      },
+      "name": "Notion Trigger",
+      "type": "n8n-nodes-base.notionTrigger",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": "你的Notion Database ID",
+        "options": {}
+      },
+      "name": "Get Notion Data",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://graph.facebook.com/v19.0/me/photos",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"message\": \"{{$node[\"Get Notion Data\"].json[\"text\"]}}\",\n  \"url\": \"{{$node[\"Get Notion Data\"].json[\"image\"]}}\",\n  \"published\": false,\n  \"scheduled_publish_time\": 1714003200\n}"
+      },
+      "name": "Schedule Facebook Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "page",
+        "pageId": "{{$node[\"Get Notion Data\"].json[\"id\"]}}",
+        "properties": {
+          "Status": "已排程"
+        }
+      },
+      "name": "Update Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Notion Trigger": {
+      "main": [
+        [
+          "Get Notion Data"
+        ]
+      ]
+    },
+    "Get Notion Data": {
+      "main": [
+        [
+          "Schedule Facebook Post"
+        ]
+      ]
+    },
+    "Schedule Facebook Post": {
+      "main": [
+        [
+          "Update Notion"
+        ]
+      ]
+    }
+  }
+}
