@@ -1,23 +1,29 @@
 {
+  "id": "1",
+  "name": "Notion to Meta Scheduler",
   "nodes": [
     {
       "parameters": {
         "triggerType": "databaseItemUpdated",
-        "databaseId": "你的Notion Database ID"
+        "databaseId": ""
       },
+      "id": "1",
       "name": "Notion Trigger",
       "type": "n8n-nodes-base.notionTrigger",
-      "typeVersion": 1
+      "typeVersion": 1,
+      "position": [240, 300]
     },
     {
       "parameters": {
         "resource": "databasePage",
-        "databaseId": "你的Notion Database ID",
+        "databaseId": "",
         "options": {}
       },
+      "id": "2",
       "name": "Get Notion Data",
       "type": "n8n-nodes-base.notion",
-      "typeVersion": 1
+      "typeVersion": 1,
+      "position": [480, 300]
     },
     {
       "parameters": {
@@ -26,9 +32,11 @@
         "jsonParameters": true,
         "bodyParametersJson": "={\n  \"message\": \"{{$node[\"Get Notion Data\"].json[\"text\"]}}\",\n  \"url\": \"{{$node[\"Get Notion Data\"].json[\"image\"]}}\",\n  \"published\": false,\n  \"scheduled_publish_time\": 1714003200\n}"
       },
+      "id": "3",
       "name": "Schedule Facebook Post",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1
+      "typeVersion": 1,
+      "position": [720, 300]
     },
     {
       "parameters": {
@@ -38,32 +46,49 @@
           "Status": "已排程"
         }
       },
+      "id": "4",
       "name": "Update Notion",
       "type": "n8n-nodes-base.notion",
-      "typeVersion": 1
+      "typeVersion": 1,
+      "position": [960, 300]
     }
   ],
   "connections": {
     "Notion Trigger": {
       "main": [
         [
-          "Get Notion Data"
+          {
+            "node": "Get Notion Data",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Get Notion Data": {
       "main": [
         [
-          "Schedule Facebook Post"
+          {
+            "node": "Schedule Facebook Post",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Schedule Facebook Post": {
       "main": [
         [
-          "Update Notion"
+          {
+            "node": "Update Notion",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
-  }
+  },
+  "active": false,
+  "settings": {},
+  "tags": []
 }
